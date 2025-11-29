@@ -110,7 +110,7 @@ sns.heatmap(correlation_matrix, annot=True, fmt='.2f', cmap='coolwarm', center=0
             square=True, linewidths=1, cbar_kws={"shrink": 0.8}, ax=ax)
 ax.set_title('Variable Correlation Matrix Heatmap', fontsize=16, fontweight='bold', pad=20)
 plt.tight_layout()
-plt.savefig('results/figures/04_correlation_heatmap.png', dpi=300, bbox_inches='tight')
+plt.savefig('results/figures/01_correlation_heatmap.png', dpi=300, bbox_inches='tight')
 plt.close()
 
 print("EDA charts have been saved to the results/figures/ directory")
@@ -292,7 +292,7 @@ axes[1, 1].set_title('Residuals Plot', fontsize=14, fontweight='bold')
 axes[1, 1].grid(True, alpha=0.3)
 
 plt.tight_layout()
-plt.savefig('results/figures/05_regression_results.png', dpi=300, bbox_inches='tight')
+plt.savefig('results/figures/02_regression_results.png', dpi=300, bbox_inches='tight')
 plt.close()
 
 # =============================================================================
@@ -370,62 +370,12 @@ axes[1].legend()
 axes[1].grid(True, alpha=0.3)
 
 plt.tight_layout()
-plt.savefig('results/figures/07_spline_regression.png', dpi=300, bbox_inches='tight')
+plt.savefig('results/figures/03_spline_regression.png', dpi=300, bbox_inches='tight')
 plt.close()
 
 # 4.2 Spline Regression for Floor vs Price
 print("\n4.2 Spline Regression for Floor vs Price")
 
-# Sort data and handle duplicates
-# For the same floor value, calculate the average price
-df_floor_price = pd.DataFrame({
-    'floor': df_clean['floor'].values,
-    'price': df_clean['price'].values
-})
-df_floor_price_agg = df_floor_price.groupby('floor')['price'].mean().reset_index()
-df_floor_price_agg = df_floor_price_agg.sort_values('floor')
-
-floor_sorted = df_floor_price_agg['floor'].values
-price_floor_sorted = df_floor_price_agg['price'].values
-
-n_samples_floor = min(5000, len(floor_sorted))
-if len(floor_sorted) > n_samples_floor:
-    indices_floor = np.linspace(0, len(floor_sorted)-1, n_samples_floor, dtype=int)
-    floor_subset = floor_sorted[indices_floor]
-    price_floor_subset = price_floor_sorted[indices_floor]
-else:
-    floor_subset = floor_sorted
-    price_floor_subset = price_floor_sorted
-
-# Ensure x is strictly increasing (remove duplicates)
-unique_mask = np.concatenate(([True], np.diff(floor_subset) > 1e-10))
-floor_subset = floor_subset[unique_mask]
-price_floor_subset = price_floor_subset[unique_mask]
-
-# Cubic spline interpolation
-if len(floor_subset) >= 4:  # Cubic spline requires at least 4 points
-    spline_floor = CubicSpline(floor_subset, price_floor_subset)
-    floor_plot = np.linspace(floor_subset.min(), floor_subset.max(), 200)
-    price_floor_spline = spline_floor(floor_plot)
-else:
-    # If too few points, use linear interpolation
-    print("Warning: Too few data points, using linear interpolation instead of spline interpolation")
-    interp_func = interp1d(floor_subset, price_floor_subset, kind='linear', fill_value='extrapolate')
-    floor_plot = np.linspace(floor_subset.min(), floor_subset.max(), 200)
-    price_floor_spline = interp_func(floor_plot)
-
-fig, ax = plt.subplots(figsize=(10, 6))
-ax.scatter(floor_subset[::10], price_floor_subset[::10], alpha=0.3, s=5, label='Data Points')
-ax.plot(floor_plot, price_floor_spline, 'r-', linewidth=2, label='Cubic Spline')
-ax.set_xlabel('Floor', fontsize=12)
-ax.set_ylabel('Price (HKD)', fontsize=12)
-ax.set_title('Floor vs Price - Spline Regression', fontsize=14, fontweight='bold')
-ax.legend()
-ax.grid(True, alpha=0.3)
-
-plt.tight_layout()
-plt.savefig('results/figures/08_floor_spline.png', dpi=300, bbox_inches='tight')
-plt.close()
 
 # =============================================================================
 # 5. Time Series Analysis
@@ -472,7 +422,7 @@ axes[1].grid(True, alpha=0.3, axis='y')
 axes[1].tick_params(axis='x', rotation=45)
 
 plt.tight_layout()
-plt.savefig('results/figures/11_time_series.png', dpi=300, bbox_inches='tight')
+plt.savefig('results/figures/04_time_series.png', dpi=300, bbox_inches='tight')
 plt.close()
 
 # =============================================================================
@@ -499,10 +449,9 @@ print("\n" + "=" * 80)
 print("Analysis complete! All results have been saved to the results/ directory")
 print("=" * 80)
 print("\nGenerated files:")
-print("  - results/figures/04_correlation_heatmap.png - Correlation Heatmap")
-print("  - results/figures/05_regression_results.png - Regression Results")
-print("  - results/figures/07_spline_regression.png - Spline Regression")
-print("  - results/figures/08_floor_spline.png - Floor Spline Regression")
-print("  - results/figures/11_time_series.png - Time Series Analysis")
+print("  - results/figures/01_correlation_heatmap.png - Correlation Heatmap")
+print("  - results/figures/02_regression_results.png - Regression Results")
+print("  - results/figures/03_spline_regression.png - Spline Regression")
+print("  - results/figures/04_time_series.png - Time Series Analysis")
 print("  - results/regression_results.csv - Regression Results Summary")
 print("  - results/feature_importance.csv - Feature Importance")
